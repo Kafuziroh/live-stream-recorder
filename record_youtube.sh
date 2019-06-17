@@ -1,5 +1,5 @@
 #!/bin/bash
-# YouTube Live Stream Recorder
+# Twitch Live Stream Recorder
 
 if [[ ! -n "$1" ]]; then
   echo "usage: $0 youtube_channel_id|live_url [format] [loop|once] [interval]"
@@ -12,7 +12,9 @@ LIVE_URL=$1
 
 # Record the highest quality available by default
 FORMAT="${2:-best}"
-INTERVAL="${4:-10}"
+
+# Set interval to 6s by default
+INTERVAL="${4:-6}"
 
 while true; do
   # Monitor live streams of specific channel
@@ -23,15 +25,23 @@ while true; do
     # Try to get video id and title of current live stream.
     # Add parameters about playlist to avoid downloading
     # the full video playlist uploaded by channel accidently.
-    METADATA=$(youtube-dl --get-id --get-title --get-description \
-      --no-playlist --playlist-items 1 \
-      --match-filter is_live "$LIVE_URL" 2>/dev/null)
-    [[ -n "$METADATA" ]] && break
+
+    # METADATA=$(youtube-dl --get-id --get-title --get-description \
+    #   --no-playlist --playlist-items 1 \
+    #   --match-filter is_live "$LIVE_URL" 2>/dev/null)
+    # [[ -n "$METADATA" ]] && break
+
+    wget -q -O- https://www.youtube.com/channel/$1/live|grep -q '\\"isLive\\":true' && break
 
     echo "$LOG_PREFIX The stream is not available now."
     echo "$LOG_PREFIX Retry after $INTERVAL seconds..."
     sleep $INTERVAL
   done
+
+  #Get metadata while live stream is available
+  METADATA=$(youtube-dl --get-id --get-title --get-description \
+    --no-playlist --playlist-items 1 \
+    --match-filter is_live "${LIVE_URL}" 2>/dev/null)
 
   # Extract video id of live stream
   ID=$(echo "$METADATA" | sed -n '2p')
@@ -49,7 +59,7 @@ while true; do
   # ffmpeg -i "$M3U8_URL" -codec copy -f mpegts "$FNAME" > "$FNAME.log" 2>&1
 
   # Use streamlink to record for HLS seeking support
-  streamlink --hls-live-restart --loglevel trace -o "$FNAME" \
+  streamlink --hls-live-restart --loglevel debug -o "$FNAME" \
     "https://www.youtube.com/watch?v=${ID}" "$FORMAT" > "$FNAME.log" 2>&1
 
   # Exit if we just need to record current stream
