@@ -28,10 +28,10 @@ while true; do
     #   --match-filter is_live "$LIVE_URL" 2>/dev/null)
     # [[ -n "$METADATA" ]] && break
 
-	# Using wget to check the stream availability
+    # Using wget to check the stream availability
     wget -q -O- https://www.youtube.com/channel/$1/live|grep -q '\\"isLive\\":true' && break
 	
-	# Retry after [interval] seconds if the stream is not available
+    # Retry after [interval] seconds if the stream is not available
     echo "$LOG_PREFIX The stream is not available now."
     echo "$LOG_PREFIX Retry after $INTERVAL seconds..."
     sleep $INTERVAL
