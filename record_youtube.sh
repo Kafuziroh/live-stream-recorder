@@ -13,8 +13,8 @@ LIVE_URL=$1
 # Record the highest quality available by default
 FORMAT="${2:-best}"
 
-# Set interval to 6s by default
-INTERVAL="${4:-6}"
+# Set interval to 15s by default
+INTERVAL="${4:-15}"
 
 while true; do
   # Monitor live streams of specific channel
@@ -29,11 +29,10 @@ while true; do
     # [[ -n "$METADATA" ]] && break
 
     # Using wget to check the stream availability
-    wget -q -O- https://www.youtube.com/channel/$1/live|grep -q '\\"isLive\\":true' && break
+    wget -q -O- "$LIVE_URL" | grep -q '\\"isLive\\":true' && break
 	
     # Retry after [interval] seconds if the stream is not available
-    echo "$LOG_PREFIX The stream is not available now."
-    echo "$LOG_PREFIX Retry after $INTERVAL seconds..."
+    echo "$LOG_PREFIX The stream is not available now. Retry after $INTERVAL seconds..."
     sleep $INTERVAL
   done
 
@@ -55,8 +54,7 @@ while true; do
   # ffmpeg -i "$M3U8_URL" -codec copy -f mpegts "$FNAME" > "$FNAME.log" 2>&1
 
   # Using streamlink to record
-  streamlink --hls-live-restart --loglevel debug -o "$FNAME" \
-    "https://www.youtube.com/watch?v=${ID}" "$FORMAT" > "$FNAME.log" 2>&1
+  streamlink --hls-live-restart --loglevel debug -o "$FNAME" "https://www.youtube.com/watch?v=${ID}" "$FORMAT" > "$FNAME.log" 2>&1
 
   # Exit if we just need to record current stream
   LOG_PREFIX=$(date +"[%Y-%m-%d %H:%M:%S]")
