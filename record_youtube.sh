@@ -29,8 +29,8 @@ while true; do
     # [[ -n "$METADATA" ]] && break
 
     # Using wget to check the stream availability
-    wget -q -O- "$LIVE_URL" | grep -q '\\"isLive\\":true' && break
-	
+    wget -q -O- "$LIVE_URL" | grep "ytplayer" | grep -q '\\"isLive\\":true' && break
+
     # Retry after [interval] seconds if the stream is not available
     echo "$LOG_PREFIX The stream is not available now. Retry after $INTERVAL seconds..."
     sleep $INTERVAL
@@ -44,7 +44,7 @@ while true; do
 
   # Record using MPEG-2 TS format to avoid broken file caused by interruption and save the metadate to file
   FNAME="youtube_${ID}_$(date +"%Y%m%d_%H%M%S").ts"
-  echo "$METADATA" > "$FNAME.info.txt"
+  echo "$METADATA" >"$FNAME.info.txt"
 
   # Print logs
   echo "$LOG_PREFIX Start recording, metadata saved to \"$FNAME.info.txt\"."
@@ -54,7 +54,7 @@ while true; do
   # ffmpeg -i "$M3U8_URL" -codec copy -f mpegts "$FNAME" > "$FNAME.log" 2>&1
 
   # Using streamlink to record
-  streamlink --hls-live-restart --loglevel debug -o "$FNAME" "https://www.youtube.com/watch?v=${ID}" "$FORMAT" > "$FNAME.log" 2>&1
+  streamlink --hls-live-restart --loglevel debug -o "$FNAME" "https://www.youtube.com/watch?v=${ID}" "$FORMAT" >"$FNAME.log" 2>&1
 
   # Exit if we just need to record current stream
   LOG_PREFIX=$(date +"[%Y-%m-%d %H:%M:%S]")
