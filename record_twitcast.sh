@@ -33,8 +33,8 @@ while true; do
   echo "$LOG_PREFIX Use command \"tail -f $FNAME.log\" to track recording progress."
 
   # Also record low resolution stream simultaneously as backup
-  M3U8_URL="http://twitcasting.tv/$1/metastream.m3u8?video=1"
-  ffmpeg -i "$M3U8_URL" -codec copy -f mpegts "$FNAME" > "$FNAME.log" 2>&1 &
+  # M3U8_URL="http://twitcasting.tv/$1/metastream.m3u8?video=1"
+  # ffmpeg -i "$M3U8_URL" -codec copy -f mpegts "$FNAME" > "$FNAME.log" 2>&1 &
 
   # Start recording
   ./livedl -tcas "$1" > "$FNAME.livedl.log" 2>&1
